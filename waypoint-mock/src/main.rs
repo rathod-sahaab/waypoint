@@ -8,17 +8,11 @@ fn main() -> ! {
         height: 240,
     });
 
-    let waypoint_display = waypoint::display::Display {
-        width: 240,
-        height: 240,
-        draw_target: &mut display,
-    };
-
     let output_settings = OutputSettingsBuilder::new().build();
     let mut window = Window::new("Waypoint mock", &output_settings);
     let display_update = |display: &SimulatorDisplay<Rgb565>| window.update(display);
 
-    let mut app = Application::new(waypoint_display);
+    let mut app = Application::new(&mut display);
 
     app.start(display_update)
 }
