@@ -1,33 +1,38 @@
-use display_interface::DisplayError;
-use embedded_graphics::{draw_target::DrawTarget, pixelcolor::{Rgb565, WebColors}, primitives::{Circle, PrimitiveStyleBuilder, Rectangle, Triangle}};
+use core::convert::Infallible;
+
 use embedded_graphics::prelude::*;
+use embedded_graphics::{
+    draw_target::DrawTarget,
+    pixelcolor::{Rgb565, WebColors},
+    primitives::{Circle, PrimitiveStyleBuilder, Rectangle, Triangle},
+};
 
 use crate::display::Display;
 
-pub struct Application<'dt,DT> {
+pub struct Application<'dt, DT> {
     display: Display<'dt, DT>,
 }
 
-
-impl <'dt, DT> Application <'dt, DT>
-    where DT: DrawTarget<Color = Rgb565, Error = DisplayError>{
-
+impl<'dt, DT> Application<'dt, DT>
+where
+    DT: DrawTarget<Color = Rgb565, Error = Infallible>,
+{
     pub fn new(display: Display<'dt, DT>) -> Self {
-        Self {
-            display
-        }
+        Self { display }
     }
 
-    pub fn start(&mut self) -> ! {
+    pub fn start(&mut self, mut cb: impl FnMut(&DT)) -> ! {
         self.draw_frame();
 
-        loop {
-
-        }
+        cb(self.display.draw_target);
+        loop {}
     }
 
     fn draw_frame(&mut self) {
-        self.display.draw_target.clear(Rgb565::CSS_SKY_BLUE).unwrap();
+        self.display
+            .draw_target
+            .clear(Rgb565::CSS_SKY_BLUE)
+            .unwrap();
 
         let yoffset = 100;
 
@@ -46,7 +51,7 @@ impl <'dt, DT> Application <'dt, DT>
         Triangle::new(
             Point::new(50, 32 + yoffset),
             Point::new(50 + 32, 32 + yoffset),
-            Point::new(50 + 8, yoffset),
+            Point::new(50 + 16, yoffset),
         )
         .into_styled(style)
         .draw(self.display.draw_target)
