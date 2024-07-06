@@ -1,0 +1,9 @@
+[package]
+name = "waypoint"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+embedded-graphics = "0.8.1"
+embedded-graphics-core = "0.4.0"
+display-interface = '0.4.1'
