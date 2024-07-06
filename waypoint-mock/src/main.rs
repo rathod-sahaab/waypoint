@@ -15,7 +15,7 @@ fn main() -> ! {
     };
 
     let output_settings = OutputSettingsBuilder::new().build();
-    let mut window = Window::new("Hello World", &output_settings);
+    let mut window = Window::new("Waypoint mock", &output_settings);
     let display_update = |display: &SimulatorDisplay<Rgb565>| window.update(display);
 
     let mut app = Application::new(waypoint_display);
