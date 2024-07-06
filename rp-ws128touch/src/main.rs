@@ -18,14 +18,11 @@ use waveshare_rp2040_lcd_0_96 as bsp;
 use bsp::hal;
 use bsp::hal::{
     clocks::{init_clocks_and_plls, Clock},
-    pac,
-    pwm,
+    fugit::RateExtU32,
+    pac, pwm,
     sio::Sio,
     watchdog::Watchdog,
-    fugit::RateExtU32
 };
-
-
 
 #[entry]
 fn main() -> ! {
@@ -58,7 +55,6 @@ fn main() -> ! {
         &mut pac.RESETS,
     );
 
-
     let dc_pin = pins.gp8.into_push_pull_output();
     let spi_cs = pins.gp9.into_push_pull_output();
 
@@ -67,11 +63,9 @@ fn main() -> ! {
     let lcd_sclk = pins.gp10.into_function::<hal::gpio::FunctionSpi>();
     let spi = hal::spi::Spi::<_, _, _, 8>::new(pac.SPI1, (lcd_mosi, lcd_miso, lcd_sclk));
 
-
     let lcd_rst = pins
         .gp13
         .into_push_pull_output_in_state(hal::gpio::PinState::High);
-
 
     // Exchange the uninitialised SPI driver for an initialised one
     let spi = spi.init(
@@ -80,8 +74,6 @@ fn main() -> ! {
         8_000_000u32.Hz(),
         embedded_hal::spi::MODE_0,
     );
-
-
 
     let spi_interface = SPIInterface::new(spi, dc_pin, spi_cs);
 
@@ -107,11 +99,10 @@ fn main() -> ! {
     display.set_backlight(65000);
     // Initialize registers
     display.initialize(&mut delay).unwrap();
-    
-    let app_display = waypoint::display::Display::new(240, 240, &mut display);
-    let mut app = waypoint::application::Application::new(app_display);
 
-    app.start()
+    let mut app = waypoint::application::Application::new(&mut display);
+
+    app.start(|_| {})
 }
 
 // End of file

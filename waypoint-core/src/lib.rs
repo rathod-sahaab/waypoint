@@ -1,5 +1,4 @@
 #![no_std]
 
-pub mod display;
-pub mod application;
 pub mod accelerometer;
+pub mod application;
