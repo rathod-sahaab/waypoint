@@ -34,6 +34,7 @@ where
         self.draw_frame();
         loop {}
     }
+
     pub fn start_with_callback(&mut self, mut cb: impl FnMut(&DT)) -> ! {
         self.draw_frame();
 
