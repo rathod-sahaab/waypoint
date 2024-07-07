@@ -1,13 +1,11 @@
 #![no_std]
 #![no_main]
 
-use alloc::borrow::ToOwned;
 use bsp::entry;
 
 use defmt::*;
 use defmt_rtt as _;
 use display_interface_spi::SPIInterface;
-use embedded_hal_0_2::adc::OneShot;
 use panic_probe as _;
 
 // Provide an alias for our BSP so we can switch targets quickly.
@@ -120,17 +118,10 @@ fn main() -> ! {
     // Initialize registers
     display.initialize(&mut delay).unwrap();
 
-    let mut bat_pin = hal::adc::AdcPin::new(pins.gp29).unwrap();
+    let adc = hal::Adc::new(pac.ADC, &mut pac.RESETS);
+    let batt_pin = hal::adc::AdcPin::new(pins.gp29).unwrap();
 
-    let mut adc = hal::Adc::new(pac.ADC, &mut pac.RESETS);
-
-    let read_battery = || -> f32 {
-        let raw: u16 = adc.read(&mut bat_pin).unwrap();
-        let float: f32 = raw.into();
-        float / 100f32
-    };
-
-    let battery = AdcBattery::new_lipo(read_battery);
+    let battery = AdcBattery::new_lipo(adc, batt_pin);
 
     let mut app = waypoint::application::Application::new(&mut display, battery);
 

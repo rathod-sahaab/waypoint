@@ -31,15 +31,17 @@ where
     }
 
     pub fn start(&mut self) -> ! {
-        self.draw_frame();
-        loop {}
+        loop {
+            self.draw_frame();
+        }
     }
 
     pub fn start_with_callback(&mut self, mut cb: impl FnMut(&DT)) -> ! {
-        self.draw_frame();
+        loop {
+            self.draw_frame();
 
-        cb(self.display);
-        loop {}
+            cb(self.display);
+        }
     }
 
     fn draw_frame(&mut self) {
