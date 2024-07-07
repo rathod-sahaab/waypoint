@@ -1,26 +1,40 @@
+use alloc::format;
 use core::fmt::Debug;
-
+use embedded_graphics::mono_font::iso_8859_7::FONT_10X20;
+use embedded_graphics::mono_font::MonoTextStyle;
 use embedded_graphics::prelude::*;
+use embedded_graphics::text::{Alignment, Text};
 use embedded_graphics::{
     draw_target::DrawTarget,
     pixelcolor::{Rgb565, WebColors},
     primitives::{Circle, PrimitiveStyleBuilder, Rectangle, Triangle},
 };
 
-pub struct Application<'dt, DT> {
+use crate::battery::Battery;
+
+///
+/// DT: dipslay_target
+/// BAT: battery
+pub struct Application<'dt, DT, BAT> {
     display: &'dt mut DT,
+    battery: BAT,
 }
 
-impl<'dt, DT, E> Application<'dt, DT>
+impl<'dt, DT, E, BAT> Application<'dt, DT, BAT>
 where
     DT: DrawTarget<Color = Rgb565, Error = E>,
     E: Debug,
+    BAT: Battery,
 {
-    pub fn new(display: &'dt mut DT) -> Self {
-        Self { display }
+    pub fn new(display: &'dt mut DT, battery: BAT) -> Self {
+        Self { display, battery }
     }
 
-    pub fn start(&mut self, mut cb: impl FnMut(&DT)) -> ! {
+    pub fn start(&mut self) -> ! {
+        self.draw_frame();
+        loop {}
+    }
+    pub fn start_with_callback(&mut self, mut cb: impl FnMut(&DT)) -> ! {
         self.draw_frame();
 
         cb(self.display);
@@ -64,5 +78,30 @@ where
             .into_styled(style)
             .draw(self.display)
             .unwrap();
+
+        let text_style = MonoTextStyle::new(&FONT_10X20, Rgb565::WHITE);
+
+        Text::with_alignment(
+            "NEW!",
+            Point::new(120, yoffset - 18),
+            text_style,
+            Alignment::Center,
+        )
+        .draw(self.display)
+        .unwrap();
+
+        Text::with_alignment(
+            format!(
+                "{:.2}% @{}V",
+                self.battery.percentage(),
+                self.battery.volts()
+            )
+            .as_str(),
+            Point::new(120, 60 + yoffset),
+            text_style,
+            Alignment::Center,
+        )
+        .draw(self.display)
+        .unwrap();
     }
 }

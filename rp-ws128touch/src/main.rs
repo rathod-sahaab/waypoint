@@ -1,13 +1,13 @@
-//! Blinks the LED on a Pico board
-//!
-//! This will blink an LED attached to GP25, which is the pin the Pico uses for the on-board LED.
 #![no_std]
 #![no_main]
 
+use alloc::borrow::ToOwned;
 use bsp::entry;
+
 use defmt::*;
 use defmt_rtt as _;
 use display_interface_spi::SPIInterface;
+use embedded_hal_0_2::adc::OneShot;
 use panic_probe as _;
 
 // Provide an alias for our BSP so we can switch targets quickly.
@@ -24,9 +24,29 @@ use bsp::hal::{
     watchdog::Watchdog,
 };
 
+extern crate alloc;
+use embedded_alloc::Heap;
+
+#[global_allocator]
+static ALLOCATOR: Heap = Heap::empty();
+
+use crate::battery::AdcBattery;
+
+mod battery;
+
 #[entry]
 fn main() -> ! {
     info!("Program start");
+
+    {
+        use core::mem::MaybeUninit;
+        const HEAP_SIZE: usize = 1024;
+        static mut HEAP_MEM: [MaybeUninit<u8>; HEAP_SIZE] = [MaybeUninit::uninit(); HEAP_SIZE];
+        unsafe { ALLOCATOR.init(HEAP_MEM.as_ptr() as usize, HEAP_SIZE) }
+    }
+
+    info!("Memory init");
+
     let mut pac = pac::Peripherals::take().unwrap();
     let core = pac::CorePeripherals::take().unwrap();
     let mut watchdog = Watchdog::new(pac.WATCHDOG);
@@ -77,7 +97,7 @@ fn main() -> ! {
 
     let spi_interface = SPIInterface::new(spi, dc_pin, spi_cs);
 
-    // let mut led_pin = pins.gp25.into_push_pull_output();
+    // let mut led_pin = pins.gpio25.into_push_pull_output();
 
     // initialize PWM for backlight
     let pwm_slices = pwm::Slices::new(pac.PWM, &mut pac.RESETS);
@@ -96,13 +116,25 @@ fn main() -> ! {
     // Bring out of reset
     display.reset(&mut delay).unwrap();
     // Turn on backlight
-    display.set_backlight(65000);
+    display.set_backlight(15000);
     // Initialize registers
     display.initialize(&mut delay).unwrap();
 
-    let mut app = waypoint::application::Application::new(&mut display);
+    let mut bat_pin = hal::adc::AdcPin::new(pins.gp29).unwrap();
 
-    app.start(|_| {})
+    let mut adc = hal::Adc::new(pac.ADC, &mut pac.RESETS);
+
+    let read_battery = || -> f32 {
+        let raw: u16 = adc.read(&mut bat_pin).unwrap();
+        let float: f32 = raw.into();
+        float / 100f32
+    };
+
+    let battery = AdcBattery::new_lipo(read_battery);
+
+    let mut app = waypoint::application::Application::new(&mut display, battery);
+
+    app.start()
 }
 
 // End of file
