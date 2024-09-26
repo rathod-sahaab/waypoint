@@ -44,6 +44,8 @@ where
         }
     }
 
+    fn update(&mut self) {}
+
     fn draw_frame(&mut self) {
         self.display.clear(Rgb565::CSS_SKY_BLUE).unwrap();
 

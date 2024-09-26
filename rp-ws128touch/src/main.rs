@@ -1,6 +1,8 @@
 #![no_std]
 #![no_main]
 
+pub mod embassy;
+
 use bsp::entry;
 
 use defmt::*;
