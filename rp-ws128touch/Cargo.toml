@@ -46,7 +46,6 @@ embassy-rp = { version = "0.2.0", features = [
   "unstable-pac",
   "time-driver",
   "critical-section-impl",
-  "rp2040",
 ] }
 embassy-time = { version = "0.3.2", features = [
   "defmt",

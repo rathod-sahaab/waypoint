@@ -1,8 +1,6 @@
 #![no_std]
 #![no_main]
 
-pub mod embassy;
-
 use bsp::entry;
 
 use defmt::*;
@@ -30,9 +28,8 @@ use embedded_alloc::Heap;
 #[global_allocator]
 static ALLOCATOR: Heap = Heap::empty();
 
-use crate::battery::AdcBattery;
-
 mod battery;
+use crate::battery::AdcBattery;
 
 #[entry]
 fn main() -> ! {
