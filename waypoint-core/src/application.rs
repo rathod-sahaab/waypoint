@@ -37,18 +37,23 @@ where
     }
 
     pub fn start_with_callback(&mut self, mut cb: impl FnMut(&DT)) -> ! {
+        self.redraw();
         loop {
+            self.update();
             self.draw_frame();
 
             cb(self.display);
         }
     }
 
-    fn update(&mut self) {}
+    fn update(&mut self) {
+        self.battery.update();
+    }
 
+    fn redraw(&mut self) {
+        self.display.clear(Rgb565::CSS_LIGHT_SLATE_GRAY).unwrap();
+    }
     fn draw_frame(&mut self) {
-        self.display.clear(Rgb565::CSS_SKY_BLUE).unwrap();
-
         let yoffset = 100;
 
         let style = PrimitiveStyleBuilder::new()

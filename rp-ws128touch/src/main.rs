@@ -1,6 +1,9 @@
 #![no_std]
 #![no_main]
 
+mod battery;
+use crate::battery::AdcBattery;
+
 use bsp::entry;
 
 use defmt::*;
@@ -28,8 +31,6 @@ use embedded_alloc::Heap;
 #[global_allocator]
 static ALLOCATOR: Heap = Heap::empty();
 
-mod battery;
-use crate::battery::AdcBattery;
 
 #[entry]
 fn main() -> ! {

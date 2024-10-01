@@ -4,5 +4,4 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-circular-buffer = "0.1.9"
-nalgebra = "0.33.0"
+nalgebra = { version = "0.33.0", default-features = false, features = ["libm"] }
