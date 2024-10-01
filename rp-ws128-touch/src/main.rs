@@ -2,7 +2,7 @@
 #![no_main]
 
 use {
-    defmt::info,
+    defmt::{info, unwrap},
     defmt_rtt as _,
     embassy_executor::Spawner,
     embassy_rp::gpio::{Level, Output},
@@ -24,14 +24,6 @@ async fn blinker(mut led: Output<'static>, interval: Duration) {
 async fn main(spawner: Spawner) {
     let p = embassy_rp::init(Default::default());
 
-    let mut led = Output::new(p.PIN_25, Level::Low);
-    loop {
-        info!("led on!");
-        led.set_high();
-        Timer::after_secs(1).await;
-
-        info!("led off!");
-        led.set_low();
-        Timer::after_secs(1).await;
-    }
+    let led = Output::new(p.PIN_25, Level::Low);
+    unwrap!(spawner.spawn(blinker(led, Duration::from_millis(500))));
 }
