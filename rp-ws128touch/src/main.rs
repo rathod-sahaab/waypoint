@@ -31,7 +31,6 @@ use embedded_alloc::Heap;
 #[global_allocator]
 static ALLOCATOR: Heap = Heap::empty();
 
-
 #[entry]
 fn main() -> ! {
     info!("Program start");

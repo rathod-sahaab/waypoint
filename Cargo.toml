@@ -1,3 +1,3 @@
 [workspace]
-members = ["dsp", "rp-ws128touch", "waypoint-core", "waypoint-mock"]
+members = ["dsp", "rp-ws128-touch", "rp-ws128touch", "waypoint-core", "waypoint-mock"]
 resolver = "2"

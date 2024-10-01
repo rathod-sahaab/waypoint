@@ -31,7 +31,12 @@ where
     }
 
     pub fn start(&mut self) -> ! {
+        for _ in 0..50 {
+            self.update();
+        }
+        self.redraw();
         loop {
+            self.update();
             self.draw_frame();
         }
     }
@@ -92,17 +97,8 @@ where
         let text_style = MonoTextStyle::new(&FONT_10X20, Rgb565::WHITE);
 
         Text::with_alignment(
-            "NEW!",
-            Point::new(120, yoffset - 18),
-            text_style,
-            Alignment::Center,
-        )
-        .draw(self.display)
-        .unwrap();
-
-        Text::with_alignment(
             format!(
-                "{:.2}% @{}V",
+                "{:.2}% @{:.2}V",
                 self.battery.percentage(),
                 self.battery.volts()
             )
