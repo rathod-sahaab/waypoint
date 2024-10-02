@@ -1,4 +1,4 @@
 [workspace]
 members = ["dsp", "rp-ws128-touch", "waypoint-core", "waypoint-mock"]
 default-members = ["rp-ws128-touch"]
-resolver = "1"
+resolver = "2"

@@ -5,23 +5,29 @@ use dsp::filters::kalman::TFloatVector;
 use embassy_rp::adc::{Adc, Channel};
 use waypoint::battery::Battery;
 
-pub struct AdcBattery<SRC>
+///
+/// Adc battery reader with kalman filter to reduce the noise
+///
+pub struct AdcBattery<'a, BatteryFn>
 where
-    SRC: Channel<Adc, ID = u8>,
+    BatteryFn: FnMut() -> f32,
 {
+    /// Range of battery operation
     min: f32,
     max: f32,
-    adc: Adc,
-    batt_pin: SRC,
+
+    battery_fn: BatteryFn,
+
+    /// Store voltage guess
     volts: f32,
     kalman_filter: KalmanFilter<'static, 1, 1>,
 }
 
-impl<SRC> AdcBattery<SRC>
+impl<'a, BatteryFn> AdcBattery<'a, BatteryFn>
 where
-    SRC: Channel<Adc, ID = u8>,
+    BatteryFn: FnMut() -> f32,
 {
-    pub fn new_lipo(adc: Adc, batt_pin: SRC) -> Self {
+    pub fn new_lipo(battery_fn: &'a BatteryFn) -> Self {
         let kalman_filter = KalmanFilter::new(
             TFloatVector::<1>::from_element(4.0),
             TFloatSquare::<1>::from_element(2.0),
@@ -35,25 +41,18 @@ where
             min: 3.6,
             max: 4.2,
             volts: 4.0,
-            adc,
-            batt_pin,
+            battery_fn,
             kalman_filter,
         }
     }
-
-    fn raw_volts(&mut self) -> f32 {
-        let raw: u16 = self.adc.read(&mut self.batt_pin).unwrap();
-        let float: f32 = raw.into();
-        float / 100f32
-    }
 }
 
-impl<SRC> Battery for AdcBattery<SRC>
+impl<'a, BatteryFn> Battery for AdcBattery<'a, BatteryFn>
 where
-    SRC: Channel<Adc, ID = u8>,
+    BatteryFn: FnMut() -> f32,
 {
     fn update(&mut self) {
-        let volts: f32 = self.raw_volts();
+        let volts: f32 = self.battery_fn();
 
         self.kalman_filter.predict(1.0);
         let filtered = self

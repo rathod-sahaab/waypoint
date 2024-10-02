@@ -2,6 +2,7 @@
 #![no_main]
 
 use {
+    // battery::AdcBattery,
     defmt::{info, unwrap},
     defmt_rtt as _,
     embassy_embedded_hal::shared_bus::{
@@ -9,13 +10,13 @@ use {
     },
     embassy_executor::Spawner,
     embassy_rp::{
-        bind_interrupts,
+        // bind_interrupts,
         gpio::{Level, Output},
         spi::{self, Spi},
     },
     embassy_time::{Duration, Timer},
     panic_probe as _,
-}; // global logger
+};
 
 #[embassy_executor::task]
 async fn blinker(mut led: Output<'static>, interval: Duration) {
@@ -28,7 +29,7 @@ async fn blinker(mut led: Output<'static>, interval: Duration) {
     }
 }
 
-pub mod battery;
+// pub mod battery;
 
 const DISPLAY_FREQ: u32 = 8_000_000;
 const TOUCH_FREQ: u32 = 200_000;
@@ -37,9 +38,11 @@ const TOUCH_FREQ: u32 = 200_000;
 async fn main(spawner: Spawner) {
     let p = embassy_rp::init(Default::default());
 
-    bind_interrupts!(struct Irqs {
-        ADC_IRQ_FIFO => InterruptHandler;
-    });
+    // bind_interrupts!(struct Irqs {
+    //     ADC_IRQ_FIFO => InterruptHandler;
+    // });
+    //
+    // let adc_battery = AdcBattery::new_lipo(battery_fn);
 
     let lcd_dc = p.PIN_8;
     let lcd_cs = p.PIN_9;
