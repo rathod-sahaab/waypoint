@@ -2,9 +2,7 @@ use dsp::filters::kalman::KalmanFilter;
 use dsp::filters::kalman::StateTransition;
 use dsp::filters::kalman::TFloatSquare;
 use dsp::filters::kalman::TFloatVector;
-use embedded_hal_0_2::adc::Channel;
-use embedded_hal_0_2::adc::OneShot;
-use waveshare_rp2040_lcd_0_96::hal::Adc;
+use embassy_rp::adc::{Adc, Channel};
 use waypoint::battery::Battery;
 
 pub struct AdcBattery<SRC>
