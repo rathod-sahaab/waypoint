@@ -2,7 +2,6 @@ use dsp::filters::kalman::KalmanFilter;
 use dsp::filters::kalman::StateTransition;
 use dsp::filters::kalman::TFloatSquare;
 use dsp::filters::kalman::TFloatVector;
-use embassy_rp::adc::{Adc, Channel};
 use waypoint::battery::Battery;
 
 ///
@@ -16,7 +15,7 @@ where
     min: f32,
     max: f32,
 
-    battery_fn: BatteryFn,
+    battery_fn: &'a mut BatteryFn,
 
     /// Store voltage guess
     volts: f32,
@@ -27,7 +26,7 @@ impl<'a, BatteryFn> AdcBattery<'a, BatteryFn>
 where
     BatteryFn: FnMut() -> f32,
 {
-    pub fn new_lipo(battery_fn: &'a BatteryFn) -> Self {
+    pub fn new_lipo(battery_fn: &'a mut BatteryFn) -> Self {
         let kalman_filter = KalmanFilter::new(
             TFloatVector::<1>::from_element(4.0),
             TFloatSquare::<1>::from_element(2.0),
@@ -52,7 +51,7 @@ where
     BatteryFn: FnMut() -> f32,
 {
     fn update(&mut self) {
-        let volts: f32 = self.battery_fn();
+        let volts: f32 = (self.battery_fn)();
 
         self.kalman_filter.predict(1.0);
         let filtered = self
